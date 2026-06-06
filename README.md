@@ -1,14 +1,12 @@
-# multi-agent-drone-security-analyst
-Multi-agent AI workflow that analyzes drone telemetry, detects security risks, and recommends mission actions.
 # Multi-Agent Drone Security Analyst
 
-A multi-agent AI workflow that analyzes drone telemetry, detects security and operational risks, calculates mission risk levels, and recommends commander-level actions through automated GitHub Actions execution.
+A multi-agent AI workflow that analyzes drone telemetry, detects security and operational risks, calculates mission risk levels, and uses an LLM Commander Agent to recommend commander-level actions through automated GitHub Actions execution.
 
 ## Overview
 
-This project demonstrates core Agentic AI concepts by simulating a drone security monitoring system.
+This project demonstrates Agentic AI concepts by simulating a drone security monitoring system.
 
-Multiple specialized agents collaborate to analyze telemetry data and produce a final mission decision.
+Multiple specialized agents collaborate to analyze telemetry data, assess mission risk, and generate a final mission decision.
 
 ## Agent Architecture
 
@@ -21,7 +19,7 @@ Security Agent
       ↓
 Risk Agent
       ↓
-Commander Agent
+LLM Commander Agent
       ↓
 Final Report
 ```
@@ -30,18 +28,18 @@ Final Report
 
 ### Mission Agent
 
-Responsible for evaluating mission status and operational conditions.
+Evaluates mission status and operational conditions.
 
-Example:
+Examples:
 
 - Low battery detection
 - Mission readiness assessment
 
 ### Security Agent
 
-Responsible for identifying security threats.
+Identifies security threats.
 
-Example:
+Examples:
 
 - GPS jamming detection
 - Signal instability detection
@@ -49,7 +47,7 @@ Example:
 
 ### Risk Agent
 
-Responsible for calculating overall mission risk.
+Calculates overall mission risk.
 
 Outputs:
 
@@ -57,15 +55,16 @@ Outputs:
 - Medium Risk
 - High Risk
 
-### Commander Agent
+### LLM Commander Agent
 
-Responsible for generating the final operational decision.
+Uses an OpenAI language model to generate the final commander-level decision, reasoning, immediate actions, and risk explanation.
 
 Examples:
 
 - Continue mission
 - Continue with caution
 - Return to base immediately
+- Abort mission and execute recovery procedure
 
 ## Project Structure
 
@@ -73,9 +72,11 @@ Examples:
 multi-agent-drone-security-analyst
 │
 ├── agents.py
+├── llm_commander_agent.py
 ├── main.py
 ├── drone_telemetry.json
 ├── memory.json
+├── requirements.txt
 ├── README.md
 │
 ├── outputs/
@@ -117,8 +118,11 @@ High
 Risk Score:
 100
 
-Commander Decision:
-Return to base immediately.
+LLM Commander Decision:
+Abort mission immediately and execute Return-to-Home using non-GNSS navigation if available.
+
+Reasoning:
+The drone is operating with low battery, unstable GPS, weak communications, and possible GPS jamming. These combined conditions increase the risk of loss of control or unsafe landing.
 ```
 
 ## GitHub Actions Automation
@@ -132,6 +136,8 @@ Push Event
       ↓
 GitHub Actions
       ↓
+Install Dependencies
+      ↓
 Run Multi-Agent Analysis
       ↓
 Generate Report
@@ -141,33 +147,36 @@ Generate Report
 
 - Multi-Agent Orchestration
 - Agent Specialization
+- LLM-Powered Decision Making
+- Prompt Engineering
 - Workflow Automation
 - State Management
 - Persistent Memory
 - Risk Assessment
-- Decision Making
 - Tool Usage
 - Event-Driven Execution
 - GitHub Actions Integration
+- Secret Management with GitHub Actions
 
 ## Skills Demonstrated
 
 - Python Development
+- OpenAI API Integration
 - Agent Workflow Design
 - Autonomous Decision Pipelines
 - Security Monitoring Concepts
-- Telemetry Analysis
+- Drone Telemetry Analysis
 - GitHub Actions
 - CI/CD Automation
 - System Architecture Design
+- GenAI Application Development
 
 ## Future Enhancements
 
-- LLM-Powered Threat Analysis
-- Real Drone Telemetry Streams
-- Threat Intelligence Integration
-- Drone Fleet Monitoring
-- RAG-Based Mission Knowledge Base
-- Multi-Drone Coordination
-- Dashboard Visualization
-
+- Multiple telemetry scenarios
+- Real drone telemetry streams
+- Threat intelligence integration
+- Drone fleet monitoring
+- RAG-based mission knowledge base
+- Multi-drone coordination
+- Dashboard visualization
