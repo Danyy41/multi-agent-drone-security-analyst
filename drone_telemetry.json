@@ -1,0 +1,9 @@
+{
+  "drone_id": "DRONE-001",
+  "battery_level": 18,
+  "gps_signal": "unstable",
+  "signal_strength": 22,
+  "altitude": 120,
+  "mission_status": "active",
+  "possible_jamming": true
+}
