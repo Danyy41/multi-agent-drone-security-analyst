@@ -18,5 +18,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
       - name: Run Multi-Agent Drone Security Analyst
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python main.py
