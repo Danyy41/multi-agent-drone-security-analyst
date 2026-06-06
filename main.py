@@ -1,5 +1,6 @@
 import json
-from agents import mission_agent, security_agent, risk_agent, commander_agent
+from agents import mission_agent, security_agent, risk_agent
+from llm_commander_agent import llm_commander_agent
 
 with open("drone_telemetry.json", "r") as file:
     telemetry = json.load(file)
@@ -7,7 +8,12 @@ with open("drone_telemetry.json", "r") as file:
 mission_result = mission_agent(telemetry)
 security_risks = security_agent(telemetry)
 risk_level, risk_score = risk_agent(security_risks, telemetry)
-command_decision = commander_agent(risk_level)
+command_decision = llm_commander_agent(
+    telemetry,
+    security_risks,
+    risk_level,
+    risk_score
+)
 
 result = {
     "drone_id": telemetry["drone_id"],
