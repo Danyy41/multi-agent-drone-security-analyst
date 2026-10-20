@@ -9,7 +9,8 @@ class DroneTelemetry(BaseModel):
     """Validated drone telemetry snapshot consumed by the detection rules in agents.py."""
 
     # Unknown fields are kept so richer telemetry feeds are not rejected.
-    model_config = ConfigDict(extra="allow")
+    # Frozen so nothing (including agent tooling) can alter telemetry after validation.
+    model_config = ConfigDict(extra="allow", frozen=True)
 
     drone_id: str = Field(min_length=1)
     battery_level: float = Field(ge=0, le=100, description="Battery charge in percent.")

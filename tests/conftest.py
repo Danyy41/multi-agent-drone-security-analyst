@@ -10,6 +10,10 @@ def no_api_keys_or_network(monkeypatch):
     """Guarantee tests never use real credentials or reach a paid API."""
     for name in LLM_KEY_ENV_VARS:
         monkeypatch.delenv(name, raising=False)
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    monkeypatch.setenv("CREWAI_DISABLE_TELEMETRY", "true")
+    monkeypatch.setenv("CREWAI_TRACING_ENABLED", "false")
+    monkeypatch.setenv("OTEL_SDK_DISABLED", "true")
 
     def blocked(*args, **kwargs):
         raise RuntimeError("Network access is disabled during tests.")
