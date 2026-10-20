@@ -2,26 +2,75 @@ name: Drone Security Analyst
 
 on:
   push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  analyze-drone-security:
+  test-and-report:
 
     runs-on: ubuntu-latest
+
+    # No secrets are passed to this job: tests use mocked LLMs and the analysis
+    # runs in offline rules mode, so CI makes no model calls and costs nothing.
+    env:
+      CREWAI_DISABLE_TELEMETRY: "true"
+      CREWAI_TRACING_ENABLED: "false"
+      OTEL_SDK_DISABLED: "true"
 
     steps:
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
 
-      - name: Run Multi-Agent Drone Security Analyst
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python main.py
+      - name: Confirm No API Key Is Configured
+        run: |
+          if [ -n "${OPENAI_API_KEY:-}" ]; then
+            echo "OPENAI_API_KEY must not be set in CI." >&2
+            exit 1
+          fi
+
+      - name: Run Tests
+        run: pytest -v
+
+      - name: Run Offline Security Analysis
+        run: |
+          python main.py --mode rules --telemetry drone_telemetry.json --output-dir outputs/drone_telemetry
+          for scenario in drone_scenarios/*.json; do
+            name="$(basename "$scenario" .json)"
+            python main.py --mode rules --telemetry "$scenario" --output-dir "outputs/$name"
+          done
+
+      - name: Publish Report Summary
+        run: |
+          {
+            echo "## Drone security reports (rules mode)"
+            for report in outputs/*/report.txt; do
+              echo
+              echo "### $(dirname "$report" | xargs basename)"
+              echo '```text'
+              cat "$report"
+              echo '```'
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: drone-security-reports
+          path: |
+            outputs/*/report.json
+            outputs/*/report.txt
+          if-no-files-found: error
+          retention-days: 30
