@@ -70,6 +70,8 @@ class SecurityReport(BaseModel):
     narrative_source: Literal["llm", "rules_only", "llm_rejected"]
     policy_issues: list[PolicyIssue] = Field(default_factory=list)
     model: str | None = None
+    mode: Literal["rules", "crew"] = "rules"
+    agent_outputs: dict[str, str] = Field(default_factory=dict, description="CrewAI agent commentary (not authoritative).")
 
 
 PROMPT = ChatPromptTemplate.from_messages(
@@ -163,10 +165,10 @@ def check_against_policy(narrative: CommanderNarrative, findings: dict) -> list[
 
 
 def _rule_based_reasoning(findings: dict) -> str:
-    risks = "; ".join(findings["security_risks"]) or "no security threats detected"
+    risks = " ".join(findings["security_risks"]) or "None detected."
     return (
         f"Rule-based assessment: {findings['risk_level']} risk ({findings['risk_score']}/100). "
-        f"{findings['mission_analysis']} Threats: {risks}."
+        f"{findings['mission_analysis']} Threats: {risks}"
     )
 
 
@@ -189,13 +191,17 @@ def generate_report(
         "reasoning": _rule_based_reasoning(findings),
         "recommended_actions": [findings["rule_based_decision"]],
     }
+    if agent_outputs:
+        facts["agent_outputs"] = dict(agent_outputs)
 
     if chat_model is None:
         return SecurityReport(**facts, **fallback, narrative_source="rules_only")
 
     model_name = getattr(chat_model, "model_name", None) or getattr(chat_model, "model", None)
     inputs = {
-        "findings": json.dumps({k: v for k, v in facts.items() if k != "commander_decision"}, indent=2),
+        "findings": json.dumps(
+            {k: v for k, v in facts.items() if k not in ("commander_decision", "agent_outputs")}, indent=2
+        ),
         "policy_decision": findings["rule_based_decision"],
         "required_posture": POLICY_POSTURE[findings["risk_level"]],
         "analyst_notes": "\n\n".join(f"[{k}] {v}" for k, v in (agent_outputs or {}).items()) or "None.",

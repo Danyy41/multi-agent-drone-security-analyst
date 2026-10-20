@@ -5,36 +5,15 @@ from crewai import Process
 from crewai.llms.base_llm import BaseLLM
 from pydantic import ValidationError
 
-from crew import DroneSecurityCrew, MissingAPIKeyError, fact_lines, make_llm
-from fake_llm import ScriptedLLM, ToolCall
+from crew import DroneSecurityCrew, MissingAPIKeyError, make_llm
+from fake_llm import ROLES, TOOL_FOR_ROLE, ScriptedLLM, ToolCall, honest_scripts
 from telemetry import DroneTelemetry, load_telemetry
 from tools import build_tools, rule_findings
 
 SAMPLE_PATH = Path(__file__).resolve().parent.parent / "drone_telemetry.json"
-ROLES = ["Mission Analyst", "Security Analyst", "Risk Assessor", "Commander"]
-TOOL_FOR_ROLE = {
-    "Mission Analyst": "check_mission_status",
-    "Security Analyst": "detect_security_threats",
-    "Risk Assessor": "calculate_risk_score",
-    "Commander": "get_command_policy",
-}
-FACT_FOR_ROLE = {"Mission Analyst": "mission", "Security Analyst": "security", "Risk Assessor": "risk", "Commander": "commander"}
-
-
 @pytest.fixture
 def sample():
     return load_telemetry(SAMPLE_PATH)
-
-
-def honest_scripts(telemetry, overrides=None):
-    """Each agent calls its tool, then answers with the exact fact line plus commentary."""
-    facts = fact_lines(rule_findings(telemetry))
-    scripts = {
-        role: [ToolCall(TOOL_FOR_ROLE[role]), f"{facts[FACT_FOR_ROLE[role]]}\nAnalysis from the {role}."]
-        for role in ROLES
-    }
-    scripts.update(overrides or {})
-    return scripts
 
 
 def calls_for(llm, role):

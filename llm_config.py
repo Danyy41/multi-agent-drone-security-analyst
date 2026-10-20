@@ -14,7 +14,7 @@ def openai_settings() -> tuple[str, str]:
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise MissingAPIKeyError(
-            "OPENAI_API_KEY is not set. Export it (or put it in an untracked .env file) "
-            "to run the LLM agents, or use the rule-based mode, which needs no key."
+            "OPENAI_API_KEY is not set. Export it in your shell to run the LLM agents "
+            "(--mode crew), or use --mode rules, which needs no key."
         )
     return api_key, os.environ.get("OPENAI_MODEL", DEFAULT_MODEL)
