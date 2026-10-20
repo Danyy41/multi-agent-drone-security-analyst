@@ -17,26 +17,17 @@ from crewai import LLM, Agent, Crew, Process, Task  # noqa: E402
 from crewai.llms.base_llm import BaseLLM  # noqa: E402
 from crewai.tasks.task_output import TaskOutput  # noqa: E402
 
+from llm_config import MissingAPIKeyError, openai_settings  # noqa: E402,F401
 from telemetry import DroneTelemetry  # noqa: E402
 from tools import build_tools, rule_findings  # noqa: E402
 
-DEFAULT_MODEL = "gpt-5"
 GUARDRAIL_MAX_RETRIES = 2
 
 
-class MissingAPIKeyError(RuntimeError):
-    """Raised when the crew needs a real LLM but no OpenAI API key is configured."""
-
-
 def make_llm() -> LLM:
-    """Create the OpenAI-backed LLM for live runs, configured from environment variables."""
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise MissingAPIKeyError(
-            "OPENAI_API_KEY is not set. Export it (or put it in an untracked .env file) "
-            "to run the CrewAI agents, or use the rule-based mode, which needs no key."
-        )
-    return LLM(model=os.environ.get("OPENAI_MODEL", DEFAULT_MODEL), api_key=api_key)
+    """Create the OpenAI-backed CrewAI LLM for live runs, configured from environment variables."""
+    api_key, model = openai_settings()
+    return LLM(model=model, api_key=api_key)
 
 
 def fact_lines(findings: dict) -> dict[str, str]:
