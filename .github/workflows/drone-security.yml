@@ -2,9 +2,13 @@ name: Drone Security Analyst
 
 on:
   push:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  analyze-drone-security:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -17,11 +21,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements-dev.txt
 
-      - name: Run Multi-Agent Drone Security Analyst
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python main.py
+      # No API keys are provided: tests run offline with no paid LLM calls.
+      - name: Run Tests
+        run: pytest -v

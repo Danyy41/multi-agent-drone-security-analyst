@@ -1,1 +1,6 @@
-openai
+# Runtime dependencies, pinned to a set verified to resolve together on Python 3.12 and 3.13.
+crewai==1.15.28
+langchain-core==1.6.12
+langchain-openai==1.7.2
+openai==2.54.0
+pydantic==2.12.5

@@ -1,9 +1,9 @@
 import json
 from agents import mission_agent, security_agent, risk_agent
 from llm_commander_agent import llm_commander_agent
+from telemetry import load_telemetry
 
-with open("drone_telemetry.json", "r") as file:
-    telemetry = json.load(file)
+telemetry = load_telemetry("drone_telemetry.json").to_rule_input()
 
 mission_result = mission_agent(telemetry)
 security_risks = security_agent(telemetry)
